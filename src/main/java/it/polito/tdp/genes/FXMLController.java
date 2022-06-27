@@ -5,7 +5,10 @@
 package it.polito.tdp.genes;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import org.jheaps.monotone.DoubleRadixAddressableHeap;
 
 import it.polito.tdp.genes.model.Model;
 import javafx.event.ActionEvent;
@@ -38,12 +41,46 @@ public class FXMLController {
 
     @FXML
     void doContaArchi(ActionEvent event) {
-
+    	Double soglia;
+    	List<Double>minMax=this.model.pesoMinimoEMassimo();
+    	try {
+			soglia=Double.parseDouble(txtSoglia.getText());
+			if(soglia<minMax.get(0)||soglia>minMax.get(1)) {
+				txtResult.setText("Inserire un numero decimale compreso tra il peso minimo ed il peso massimo");
+				return;
+			}
+			List<Integer>conta=this.model.contaArchi(soglia);
+			txtResult.appendText("Soglia: "+soglia+"-----> Maggiori: "+conta.get(1)+", minori:" +conta.get(0)+"\n");
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			txtResult.setText("Inserire un numero decimale");
+			return;
+		}
     }
 
     @FXML
     void doRicerca(ActionEvent event) {
-
+    	txtResult.clear();
+    	
+    	Double soglia;
+    	List<Double>minMax=this.model.pesoMinimoEMassimo();
+    	try {
+			soglia=Double.parseDouble(txtSoglia.getText());
+			if(soglia<minMax.get(0)||soglia>minMax.get(1)) {
+				txtResult.setText("Inserire un numero decimale compreso tra il peso minimo ed il peso massimo");
+				return;
+			}
+			List<Integer>result=this.model.cerca(soglia);
+			txtResult.setText("Sequenza di cromosomi di lunghezza massima: \n");
+			for(Integer i:result) {
+				txtResult.appendText(i+"\n");
+			}
+			
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			txtResult.setText("Inserire un numero decimale");
+			return;
+		}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -57,6 +94,12 @@ public class FXMLController {
 
 	public void setModel(Model model) {
 		this.model = model ;
-		
+		txtResult.clear();
+    	this.model.creaGrafo();
+    	txtResult.appendText("#VERTICI: "+this.model.nVertici()+"\n");
+    	txtResult.appendText("#ARCHI: "+this.model.nArchi()+"\n");
+    	List<Double>output=this.model.pesoMinimoEMassimo();
+    	txtResult.appendText("Peso minimo: "+output.get(0)+" , Peso massimo: "+output.get(1)+"\n");
+    	
 	}
 }
